@@ -1,9 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import os
+import tempfile
+import openai
 
 from generator import VibeWatchRecommender
+from tmdb_client import fetch_poster_url
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "YOUR_OPENAI_API_KEY_HERE"
 
@@ -21,13 +24,50 @@ async def startup_event():
     if OPENAI_API_KEY == "YOUR_OPENAI_API_KEY_HERE":
         print("WARNING: OPENAI_API_KEY not set. Recommender will likely fail.")
     recommender = VibeWatchRecommender(openai_api_key=OPENAI_API_KEY)
+    openai.api_key = OPENAI_API_KEY
 
 
 @app.post("/recommend")
 async def recommend(req: RecommendRequest):
     try:
         recs = recommender.recommend(req.user_input, k=req.k)
+        # Enrich with poster URLs
+        for r in recs:
+            if "poster" not in r or not r.get("poster"):
+                poster = fetch_poster_url(r.get("title", ""))
+                if poster:
+                    r["poster"] = poster
         return recs
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Voice-based recommendation endpoint
+
+
+@app.post("/recommend_voice")
+async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
+    """Accepts an audio file, transcribes it with Whisper, then returns movie recommendations."""
+    try:
+        # Save uploaded audio to a temporary file
+        contents = await file.read()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+            tmp.write(contents)
+            tmp.flush()
+            tmp_path = tmp.name
+
+        # Transcribe using OpenAI Whisper
+        transcription = openai.Audio.transcribe("whisper-1", open(tmp_path, "rb"))
+        query_text = transcription["text"] if isinstance(transcription, dict) else transcription
+
+        # Fetch recommendations via existing pipeline
+        recs = recommender.recommend(query_text, k=k)
+        for r in recs:
+            if "poster" not in r or not r.get("poster"):
+                poster = fetch_poster_url(r.get("title", ""))
+                if poster:
+                    r["poster"] = poster
+        return {"query": query_text, "recs": recs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -65,7 +105,11 @@ HTML_PAGE = """
       font-weight: 600;
       color: var(--accent);
       letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
+    header .logo { height: 36px; }
     main {
       width: 100%;
       max-width: 1100px;
@@ -94,7 +138,22 @@ HTML_PAGE = """
       cursor: pointer;
       transition: opacity .2s ease;
     }
-    #submitBtn:hover { opacity: .9; }
+    #micBtn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+      margin-left: 8px;
+    }
+    #micBtn.rec {
+      background: #1db954;
+    }
+    #submitBtn:hover, #micBtn:hover { opacity: .9; }
     #resultsGrid {
       margin-top: 32px;
       display: grid;
@@ -141,10 +200,11 @@ HTML_PAGE = """
   </style>
 </head>
 <body>
-  <header>🍿 VibeWatch</header>
+  <header><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" class="logo" alt="Disney+ logo"/> VibeWatch</header>
   <main>
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
     <button id="submitBtn" onclick="submit()">Find Movies</button>
+    <button id="micBtn">🎤 Speak</button>
     <div id="resultsGrid"></div>
     <div id="loading" class="loading" style="display:none;">Searching…</div>
   </main>
@@ -173,7 +233,7 @@ HTML_PAGE = """
             const card = document.createElement('div');
             card.className = 'movie-card';
             const img = document.createElement('img');
-            img.src = 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
+            img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
             card.appendChild(img);
             const info = document.createElement('div');
             info.className = 'movie-info';
@@ -192,6 +252,77 @@ HTML_PAGE = """
     document.getElementById('queryBox').addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.ctrlKey) submit();
     });
+
+    const micBtn = document.getElementById('micBtn');
+    let mediaRecorder, audioChunks = [];
+
+    micBtn.addEventListener('click', async () => {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            sendVoice(blob);
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+          micBtn.textContent = '⏹️ Stop';
+          micBtn.classList.add('rec');
+        } catch (err) {
+          alert('Microphone access denied');
+        }
+      } else if (mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        micBtn.textContent = '🎤 Speak';
+        micBtn.classList.remove('rec');
+      }
+    });
+
+    async function sendVoice(blob) {
+      const grid = document.getElementById('resultsGrid');
+      const loading = document.getElementById('loading');
+      grid.innerHTML = '';
+      loading.style.display = 'block';
+      try {
+        const fd = new FormData();
+        fd.append('file', blob, 'voice.webm');
+        fd.append('k', '20');
+        const resp = await fetch('/recommend_voice', { method: 'POST', body: fd });
+        if (!resp.ok) throw new Error(resp.statusText);
+        const data = await resp.json();
+        loading.style.display = 'none';
+
+        const recs = Array.isArray(data) ? data : data.recs;
+        const transcribed = Array.isArray(data) ? '' : (data.query || '');
+        if (transcribed) {
+          document.getElementById('queryBox').value = transcribed;
+        }
+
+        if (Array.isArray(recs) && recs.length) {
+          grid.innerHTML = '';
+          recs.forEach((movie, idx) => {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            const img = document.createElement('img');
+            img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
+            card.appendChild(img);
+            const info = document.createElement('div');
+            info.className = 'movie-info';
+            info.innerHTML = `<div class="movie-title">${idx + 1}. ${movie.title}</div><div class="movie-reason">${movie.reason}</div>`;
+            card.appendChild(info);
+            grid.appendChild(card);
+          });
+        } else {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
+        }
+      } catch (e) {
+        loading.style.display = 'none';
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
+      }
+    }
   </script>
 </body>
 </html>
