@@ -1,0 +1,51 @@
+INTELLIJ IDEA PYTHON INTERPRETER CONFIGURATION
+==============================================
+
+Your VibeWatch Project Setup Information:
+
+1. PROJECT PATH:
+   /Users/ali.abbasi/workspace/vibewatch
+
+2. PYTHON INTERPRETER PATH:
+   /Users/ali.abbasi/workspace/vibewatch/.venv/bin/python
+
+3. PYTHON VERSION:
+   Python 3.13.3
+
+4. VIRTUAL ENVIRONMENT PATH:
+   /Users/ali.abbasi/workspace/vibewatch/.venv
+
+STEP-BY-STEP CONFIGURATION:
+==========================
+
+1. Open IntelliJ IDEA
+2. Open your project: /Users/ali.abbasi/workspace/vibewatch
+3. Go to: File → Settings (or IntelliJ IDEA → Preferences on macOS)
+4. Navigate to: Project → Python Interpreter
+5. Click the gear icon ⚙️ → Add...
+6. Select: Virtualenv Environment
+7. Choose: Existing environment
+8. Set interpreter path to: /Users/ali.abbasi/workspace/vibewatch/.venv/bin/python
+9. Click OK
+
+PROJECT STRUCTURE SETUP:
+========================
+
+1. Go to: File → Project Structure
+2. In Sources tab, mark these as Source Roots:
+   - /Users/ali.abbasi/workspace/vibewatch (root)
+   - /Users/ali.abbasi/workspace/vibewatch/api
+   - /Users/ali.abbasi/workspace/vibewatch/scripts
+
+VERIFICATION:
+============
+
+After setup, you should see these key packages installed:
+✓ fastapi (0.116.1)
+✓ uvicorn (0.35.0)
+✓ openai (1.97.1)
+✓ pandas (2.3.1)
+✓ faiss-cpu (1.11.0.post1)
+✓ langchain (0.3.26)
+
+Your project should now have full code completion and IntelliSense support!

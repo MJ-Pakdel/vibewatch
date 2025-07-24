@@ -36,206 +36,163 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🍿 VibeWatch - Your Movie Mood Matcher</title>
-<style>
-body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    max-width: 800px; 
-    margin: 0 auto; 
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    color: #333;
-}
-
-.container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    backdrop-filter: blur(10px);
-}
-
-h1 { 
-    text-align: center;
-    color: #2c3e50;
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-
-.subtitle {
-    text-align: center;
-    color: #7f8c8d;
-    font-size: 1.2em;
-    margin-bottom: 30px;
-}
-
-textarea { 
-    width: 100%; 
-    height: 120px; 
-    border: 3px solid #3498db;
-    border-radius: 15px;
-    padding: 15px;
-    font-size: 16px;
-    font-family: inherit;
-    resize: vertical;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-}
-
-textarea:focus {
-    outline: none;
-    border-color: #e74c3c;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
-    transform: scale(1.02);
-}
-
-.button-container {
-    text-align: center;
-    margin: 25px 0;
-}
-
-button { 
-    background: linear-gradient(45deg, #e74c3c, #f39c12);
-    color: white;
-    border: none;
-    padding: 15px 40px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(231, 76, 60, 0.6);
-    background: linear-gradient(45deg, #c0392b, #d68910);
-}
-
-button:active {
-    transform: translateY(-1px);
-}
-
-#results { 
-    background: #f8f9fa;
-    border-radius: 15px;
-    padding: 20px;
-    margin-top: 25px;
-    border-left: 5px solid #3498db;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-    white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.loading {
-    text-align: center;
-    color: #e74c3c;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.movie-card {
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 10px 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #e74c3c;
-}
-
-.movie-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-
-.movie-reason {
-    color: #555;
-    font-style: italic;
-    line-height: 1.4;
-}
-
-.emoji {
-    font-size: 1.2em;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeWatch – Movie Mood Matcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141414;
+      --card-bg: #1f1f1f;
+      --accent: #e50914;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 24px 32px;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    main {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+      flex: 1;
+    }
+    #queryBox {
+      width: 100%;
+      height: 80px;
+      padding: 16px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    #submitBtn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+    }
+    #submitBtn:hover { opacity: .9; }
+    #resultsGrid {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+    }
+    .movie-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .movie-card img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      background: #333;
+    }
+    .movie-info {
+      padding: 12px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .movie-title {
+      font-size: .95rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .movie-reason {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .loading {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>🍿 VibeWatch</h1>
-    <p class="subtitle">Your AI-powered movie mood matcher! ✨</p>
-    
-    <textarea id="user_input" placeholder="Tell me about your vibe! Are you feeling adventurous? Want to laugh? Need something to watch with the family? Describe your mood, who you're with, or what kind of night you're having... 🎬"></textarea>
-    
-    <div class="button-container">
-        <button onclick="submit()">🎯 Find My Perfect Movies!</button>
-    </div>
-    
-    <div id="results"></div>
-</div>
-
-<script>
-async function submit() {
-  const user_input = document.getElementById('user_input').value.trim();
-  const resArea = document.getElementById('results');
-  
-  if (!user_input) {
-    resArea.innerHTML = '<div style="color: #e74c3c; text-align: center;">Please describe your mood or viewing context first! 😊</div>';
-    return;
-  }
-  
-  resArea.innerHTML = '<div class="loading">🎬 Finding your perfect movies... ✨</div>';
-  
-  try {
-    const resp = await fetch('/recommend', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_input, k: 10 })
+  <header>🍿 VibeWatch</header>
+  <main>
+    <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
+    <button id="submitBtn" onclick="submit()">Find Movies</button>
+    <div id="resultsGrid"></div>
+    <div id="loading" class="loading" style="display:none;">Searching…</div>
+  </main>
+  <script>
+    async function submit() {
+      const user_input = document.getElementById('queryBox').value.trim();
+      if (!user_input) {
+        alert('Please describe your mood first!');
+        return;
+      }
+      const grid = document.getElementById('resultsGrid');
+      const loading = document.getElementById('loading');
+      grid.innerHTML = '';
+      loading.style.display = 'block';
+      try {
+        const resp = await fetch('/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input, k: 20 })
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+        const data = await resp.json();
+        loading.style.display = 'none';
+        if (Array.isArray(data) && data.length) {
+          data.forEach((movie, idx) => {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            const img = document.createElement('img');
+            img.src = 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
+            card.appendChild(img);
+            const info = document.createElement('div');
+            info.className = 'movie-info';
+            info.innerHTML = `<div class="movie-title">${idx + 1}. ${movie.title}</div><div class="movie-reason">${movie.reason}</div>`;
+            card.appendChild(info);
+            grid.appendChild(card);
+          });
+        } else {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
+        }
+      } catch (e) {
+        loading.style.display = 'none';
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
+      }
+    }
+    document.getElementById('queryBox').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.ctrlKey) submit();
     });
-    
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    
-    const data = await resp.json();
-    
-    if (Array.isArray(data) && data.length > 0) {
-      let html = '<h3 style="color: #2c3e50; margin-bottom: 20px;">🎭 Your Personalized Movie Recommendations:</h3>';
-      data.forEach((movie, index) => {
-        html += `
-          <div class="movie-card">
-            <div class="movie-title">${index + 1}. 🎬 ${movie.title}</div>
-            <div class="movie-reason">${movie.reason}</div>
-          </div>
-        `;
-      });
-      resArea.innerHTML = html;
-    } else {
-      resArea.innerHTML = '<div style="color: #e74c3c;">No recommendations found. Try describing your mood differently! 🤔</div>';
-    }
-    
-  } catch (error) {
-    resArea.innerHTML = `<div style="color: #e74c3c;">Error: ${error.message} 😞</div>`;
-  }
-}
-
-// Allow Enter key to submit
-document.getElementById('user_input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    submit();
-  }
-});
-</script>
+  </script>
 </body>
 </html>
 """
