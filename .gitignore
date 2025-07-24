@@ -1,0 +1,9 @@
+# Large data files
+data/hulu_disneyplus_us.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

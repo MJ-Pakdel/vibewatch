@@ -1,0 +1,106 @@
+{
+  "service": "Disney+",
+  "media_type": "movie",
+  "tmdb_id": 1243341,
+  "title": "Z-O-M-B-I-E-S 4: Dawn of the Vampires",
+  "name": null,
+  "original_title": "Z-O-M-B-I-E-S 4: Dawn of the Vampires",
+  "original_name": null,
+  "overview": "A new adventure dawns for Zed and Addison when their summer road trip takes an unexpected detour, landing them in the middle of yet another monster rivalry: Daywalkers vs. Vampires. Tensions flare when Zed and Addison find themselves acting as camp counselors between the two opposing supernatural factions. With the help of Eliza and Willa, they must convince sworn enemies Nova and Victor to try to unite their warring worlds before an even greater threat endangers them all.",
+  "tagline": "Fight for what you believe in.",
+  "release_date": "2025-07-10",
+  "first_air_date": null,
+  "last_air_date": null,
+  "runtime": 88.0,
+  "episode_run_time": null,
+  "number_of_seasons": null,
+  "number_of_episodes": null,
+  "original_language": "en",
+  "popularity": 79.0597,
+  "vote_average": 7.0,
+  "vote_count": 79,
+  "budget": 0,
+  "revenue": 0,
+  "genres": [
+    {
+      "id": 10402,
+      "name": "Music"
+    },
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 10749,
+      "name": "Romance"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    },
+    {
+      "id": 10751,
+      "name": "Family"
+    }
+  ],
+  "origin_country": [
+    "US"
+  ],
+  "keywords": [
+    {
+      "id": 3133,
+      "name": "vampire"
+    },
+    {
+      "id": 3616,
+      "name": "college"
+    },
+    {
+      "id": 4344,
+      "name": "musical"
+    },
+    {
+      "id": 7312,
+      "name": "road trip"
+    },
+    {
+      "id": 9663,
+      "name": "sequel"
+    },
+    {
+      "id": 12377,
+      "name": "zombie"
+    },
+    {
+      "id": 14714,
+      "name": "summer vacation"
+    },
+    {
+      "id": 188237,
+      "name": "teenage romance"
+    },
+    {
+      "id": 212760,
+      "name": "interspecies romance"
+    },
+    {
+      "id": 343248,
+      "name": "tv movie"
+    }
+  ],
+  "images": {
+    "posters": [
+      {
+        "aspect_ratio": 0.666,
+        "height": 2000,
+        "iso_639_1": "en",
+        "vote_average": 4.656,
+        "vote_count": 16,
+        "width": 1333,
+        "full_url": "https://image.tmdb.org/t/p/original/6rGsqBxI4r1YkS9FuraovWi465w.jpg",
+        "tmdb_id": 1243341
+      }
+    ]
+  },
+  "content_ratings": {}
+}

@@ -1,0 +1,738 @@
+{
+  "Disney+_movie": {
+    "service": "Disney+",
+    "media_type": "movie",
+    "tmdb_id": 1243341,
+    "title": "Z-O-M-B-I-E-S 4: Dawn of the Vampires",
+    "name": null,
+    "original_title": "Z-O-M-B-I-E-S 4: Dawn of the Vampires",
+    "original_name": null,
+    "overview": "A new adventure dawns for Zed and Addison when their summer road trip takes an unexpected detour, landing them in the middle of yet another monster rivalry: Daywalkers vs. Vampires. Tensions flare when Zed and Addison find themselves acting as camp counselors between the two opposing supernatural factions. With the help of Eliza and Willa, they must convince sworn enemies Nova and Victor to try to unite their warring worlds before an even greater threat endangers them all.",
+    "tagline": "Fight for what you believe in.",
+    "release_date": "2025-07-10",
+    "first_air_date": null,
+    "last_air_date": null,
+    "runtime": 88.0,
+    "episode_run_time": null,
+    "number_of_seasons": null,
+    "number_of_episodes": null,
+    "original_language": "en",
+    "popularity": 79.0597,
+    "vote_average": 7.0,
+    "vote_count": 79,
+    "budget": 0,
+    "revenue": 0,
+    "genres": [
+      {
+        "id": 10402,
+        "name": "Music"
+      },
+      {
+        "id": 12,
+        "name": "Adventure"
+      },
+      {
+        "id": 10749,
+        "name": "Romance"
+      },
+      {
+        "id": 35,
+        "name": "Comedy"
+      },
+      {
+        "id": 10751,
+        "name": "Family"
+      }
+    ],
+    "origin_country": "[\"US\"]",
+    "keywords": [
+      {
+        "id": 3133,
+        "name": "vampire"
+      },
+      {
+        "id": 3616,
+        "name": "college"
+      },
+      {
+        "id": 4344,
+        "name": "musical"
+      },
+      {
+        "id": 7312,
+        "name": "road trip"
+      },
+      {
+        "id": 9663,
+        "name": "sequel"
+      },
+      {
+        "id": 12377,
+        "name": "zombie"
+      },
+      {
+        "id": 14714,
+        "name": "summer vacation"
+      },
+      {
+        "id": 188237,
+        "name": "teenage romance"
+      },
+      {
+        "id": 212760,
+        "name": "interspecies romance"
+      },
+      {
+        "id": 343248,
+        "name": "tv movie"
+      }
+    ],
+    "images": {
+      "posters": [
+        {
+          "aspect_ratio": 0.666,
+          "height": 2000,
+          "iso_639_1": "en",
+          "vote_average": 4.656,
+          "vote_count": 16,
+          "width": 1333,
+          "full_url": "https://image.tmdb.org/t/p/original/6rGsqBxI4r1YkS9FuraovWi465w.jpg",
+          "tmdb_id": 1243341
+        }
+      ]
+    },
+    "content_ratings": {}
+  },
+  "Disney+_tv": {
+    "service": "Disney+",
+    "media_type": "tv",
+    "tmdb_id": 456,
+    "title": null,
+    "name": "The Simpsons",
+    "original_title": null,
+    "original_name": "The Simpsons",
+    "overview": "Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa and Maggie, as well as a virtual cast of thousands. Since the beginning, the series has been a pop culture icon, attracting hundreds of celebrities to guest star. The show has also made name for itself in its fearless satirical take on politics, media and American life in general.",
+    "tagline": null,
+    "release_date": null,
+    "first_air_date": "1989-12-17",
+    "last_air_date": "2025-05-18",
+    "runtime": null,
+    "episode_run_time": "[22]",
+    "number_of_seasons": 36,
+    "number_of_episodes": 786,
+    "original_language": "en",
+    "popularity": 234.5631,
+    "vote_average": 8.012,
+    "vote_count": 10282,
+    "budget": null,
+    "revenue": null,
+    "genres": [
+      {
+        "id": 10751,
+        "name": "Family"
+      },
+      {
+        "id": 16,
+        "name": "Animation"
+      },
+      {
+        "id": 35,
+        "name": "Comedy"
+      }
+    ],
+    "origin_country": "[\"US\"]",
+    "keywords": [
+      {
+        "name": "nuclear power plant",
+        "id": 4368
+      },
+      {
+        "name": "middle class",
+        "id": 6071
+      },
+      {
+        "name": "cartoon",
+        "id": 6513
+      },
+      {
+        "name": "satire",
+        "id": 8201
+      },
+      {
+        "name": "parody",
+        "id": 9755
+      },
+      {
+        "name": "dysfunctional family",
+        "id": 10041
+      },
+      {
+        "name": "school",
+        "id": 10873
+      },
+      {
+        "name": "adult humor",
+        "id": 11192
+      },
+      {
+        "name": "social satire",
+        "id": 11514
+      },
+      {
+        "name": "family",
+        "id": 18035
+      },
+      {
+        "name": "adult animation",
+        "id": 161919
+      },
+      {
+        "name": "sitcom",
+        "id": 193171
+      },
+      {
+        "name": "kids",
+        "id": 208349
+      },
+      {
+        "name": "animation",
+        "id": 297442
+      }
+    ],
+    "images": {
+      "posters": [
+        {
+          "aspect_ratio": 0.667,
+          "height": 1500,
+          "iso_639_1": "en",
+          "vote_average": 6.834,
+          "vote_count": 42,
+          "width": 1000,
+          "full_url": "https://image.tmdb.org/t/p/original/k5UALlcA0EnviaCUn2wMjOWYiOO.jpg",
+          "tmdb_id": 456
+        }
+      ]
+    },
+    "content_ratings": {
+      "results": [
+        {
+          "descriptors": [],
+          "iso_3166_1": "DE",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "US",
+          "rating": "TV-PG"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "CA",
+          "rating": "14+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "AU",
+          "rating": "M"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FR",
+          "rating": "NR"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FR",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "RU",
+          "rating": "16+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "KR",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "GB",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "BR",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PT",
+          "rating": "10AP"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "LT",
+          "rating": "N-7"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "ES",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "SG",
+          "rating": "NC16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IN",
+          "rating": "U/A 13+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IL",
+          "rating": "12+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "US",
+          "rating": "TV-14"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PT",
+          "rating": "NR"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "SG",
+          "rating": "G"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "DK",
+          "rating": "11"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PH",
+          "rating": "G"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "MX",
+          "rating": "B"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "CA",
+          "rating": "PG"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "NL",
+          "rating": "6"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IT",
+          "rating": "T"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "TR",
+          "rating": "13+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IN",
+          "rating": "U"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "MY",
+          "rating": "U"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "AT",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IE",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "CH",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PL",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "RO",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FI",
+          "rating": "S"
+        }
+      ]
+    }
+  },
+  "Hulu_movie": {
+    "service": "Hulu",
+    "media_type": "movie",
+    "tmdb_id": 1087891,
+    "title": "The Amateur",
+    "name": null,
+    "original_title": "The Amateur",
+    "original_name": null,
+    "overview": "After his life is turned upside down when his wife is killed in a London terrorist attack, a brilliant but introverted CIA decoder takes matters into his own hands when his supervisors refuse to take action.",
+    "tagline": "Don't underestimate him.",
+    "release_date": "2025-04-09",
+    "first_air_date": null,
+    "last_air_date": null,
+    "runtime": 123.0,
+    "episode_run_time": null,
+    "number_of_seasons": null,
+    "number_of_episodes": null,
+    "original_language": "en",
+    "popularity": 91.8499,
+    "vote_average": 6.988,
+    "vote_count": 896,
+    "budget": 60000000,
+    "revenue": 95956038,
+    "genres": [
+      {
+        "id": 53,
+        "name": "Thriller"
+      },
+      {
+        "id": 28,
+        "name": "Action"
+      }
+    ],
+    "origin_country": "[\"US\"]",
+    "keywords": [
+      {
+        "id": 591,
+        "name": "central intelligence agency (cia)"
+      },
+      {
+        "id": 818,
+        "name": "based on novel or book"
+      },
+      {
+        "id": 10685,
+        "name": "escape"
+      },
+      {
+        "id": 1936,
+        "name": "blackmail"
+      },
+      {
+        "id": 9748,
+        "name": "revenge"
+      },
+      {
+        "id": 33705,
+        "name": "agent"
+      },
+      {
+        "id": 41336,
+        "name": "government assassin"
+      },
+      {
+        "id": 162300,
+        "name": "government cover-up"
+      },
+      {
+        "id": 181635,
+        "name": "government conspiracy"
+      },
+      {
+        "id": 208397,
+        "name": "death of wife"
+      },
+      {
+        "id": 217282,
+        "name": "spy thriller"
+      },
+      {
+        "id": 303918,
+        "name": "computer hacker"
+      },
+      {
+        "id": 335521,
+        "name": "terrorist"
+      }
+    ],
+    "images": {
+      "posters": [
+        {
+          "aspect_ratio": 0.667,
+          "height": 3000,
+          "iso_639_1": "en",
+          "vote_average": 8.908,
+          "vote_count": 18,
+          "width": 2000,
+          "full_url": "https://image.tmdb.org/t/p/original/SNEoUInCa5fAgwuEBMIMBGvkkh.jpg",
+          "tmdb_id": 1087891
+        }
+      ]
+    },
+    "content_ratings": {}
+  },
+  "Hulu_tv": {
+    "service": "Hulu",
+    "media_type": "tv",
+    "tmdb_id": 1416,
+    "title": null,
+    "name": "Grey's Anatomy",
+    "original_title": null,
+    "original_name": "Grey's Anatomy",
+    "overview": "Follows the personal and professional lives of a group of doctors at Seattle’s Grey Sloan Memorial Hospital.",
+    "tagline": "Begin again.",
+    "release_date": null,
+    "first_air_date": "2005-03-27",
+    "last_air_date": "2025-05-15",
+    "runtime": null,
+    "episode_run_time": "[]",
+    "number_of_seasons": 22,
+    "number_of_episodes": 450,
+    "original_language": "en",
+    "popularity": 389.5684,
+    "vote_average": 8.221,
+    "vote_count": 10572,
+    "budget": null,
+    "revenue": null,
+    "genres": [
+      {
+        "id": 18,
+        "name": "Drama"
+      }
+    ],
+    "origin_country": "[\"US\"]",
+    "keywords": [
+      {
+        "name": "seattle, washington",
+        "id": 2350
+      },
+      {
+        "name": "trauma",
+        "id": 2754
+      },
+      {
+        "name": "workplace",
+        "id": 6282
+      },
+      {
+        "name": "hospital",
+        "id": 11612
+      },
+      {
+        "name": "doctor",
+        "id": 13005
+      },
+      {
+        "name": "medical student",
+        "id": 187675
+      },
+      {
+        "name": "surgical interns",
+        "id": 201352
+      },
+      {
+        "name": "medical drama",
+        "id": 208788
+      }
+    ],
+    "images": {
+      "posters": [
+        {
+          "aspect_ratio": 0.667,
+          "height": 3000,
+          "iso_639_1": "en",
+          "vote_average": 7.19,
+          "vote_count": 7,
+          "width": 2000,
+          "full_url": "https://image.tmdb.org/t/p/original/7jEVqXC14bhfAzSPgr896dMdDv6.jpg",
+          "tmdb_id": 1416
+        }
+      ]
+    },
+    "content_ratings": {
+      "results": [
+        {
+          "descriptors": [],
+          "iso_3166_1": "DE",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "US",
+          "rating": "TV-14"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "AU",
+          "rating": "MA15+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "KR",
+          "rating": "19"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "GB",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "BR",
+          "rating": "14"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PT",
+          "rating": "12AP"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "HU",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "SG",
+          "rating": "M18"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "MX",
+          "rating": "B"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PH",
+          "rating": "PG"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IN",
+          "rating": "U"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "MY",
+          "rating": "U"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "MX",
+          "rating": "A"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "AU",
+          "rating": "M"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FR",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "DK",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "SE",
+          "rating": "Från 11 år"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "ES",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "NL",
+          "rating": "12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "CA",
+          "rating": "14+"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "AT",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "IE",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "CH",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "PL",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "RO",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "NO",
+          "rating": "15"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FI",
+          "rating": "K12"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "FI",
+          "rating": "K16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "BE",
+          "rating": "14"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "LU",
+          "rating": "16"
+        },
+        {
+          "descriptors": [],
+          "iso_3166_1": "RU",
+          "rating": "18+"
+        }
+      ]
+    }
+  }
+}
