@@ -15,9 +15,11 @@ pip install -r requirements.txt
 # 2) Set your OpenAI key (anywhere in your env)
 export OPENAI_API_KEY="sk-..."
 
+
+Skip this section unless you mean to update the embeddings
 # 3) Download MovieLens data & build embeddings (≈2 min)
-python scripts/download_and_prepare_data.py
-python scripts/build_embeddings.py
+# python scripts/download_and_prepare_data.py
+# python scripts/build_embeddings.py
 
 # 4) Launch the FastAPI server
 uvicorn api.app:app --reload
