@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import os
 import tempfile
-import openai
+from openai import OpenAI
 
 from generator import VibeWatchRecommender
 
@@ -22,8 +22,9 @@ async def startup_event():
     global recommender
     if OPENAI_API_KEY == "YOUR_OPENAI_API_KEY_HERE":
         print("WARNING: OPENAI_API_KEY not set. Recommender will likely fail.")
+    global openai_client
     recommender = VibeWatchRecommender(openai_api_key=OPENAI_API_KEY)
-    openai.api_key = OPENAI_API_KEY
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 @app.post("/recommend")
@@ -51,9 +52,12 @@ async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
             tmp.flush()
             tmp_path = tmp.name
 
-        # Transcribe using OpenAI Whisper
-        transcription = openai.Audio.transcribe("whisper-1", open(tmp_path, "rb"))
-        query_text = transcription["text"] if isinstance(transcription, dict) else transcription
+        # Transcribe using OpenAI Whisper via new SDK
+        resp = openai_client.audio.transcriptions.create(
+            model="whisper-1",
+            file=open(tmp_path, "rb")
+        )
+        query_text = resp.text
 
         # Fetch recommendations via existing pipeline
         recs = recommender.recommend(query_text, k=k)
