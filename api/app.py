@@ -192,6 +192,71 @@ HTML_PAGE = """
       color: var(--accent);
       font-weight: 600;
     }
+    #moodContainer {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    /* Unified knob styles (mood + age) */
+    .knob-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--muted);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .2s ease, border .2s ease, box-shadow .2s ease, transform .15s ease;
+    }
+    .knob-btn:hover {
+      background: #2d2d2d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .knob-btn.selected {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--accent) 0%, #ff7d1a 100%);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(229,9,20,0.6);
+    }
+
+    /* Specific tweaks */
+    .mood-btn { font-size: .9rem; }
+    .age-btn  { font-size: .8rem; }
+    .mood-btn span.emoji { font-size: 1.1rem; }
+    /* Age selector styles */
+    #ageSection {
+      display: none;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .age-hint {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 8px;
+    }
+    #ageContainer {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .age-btn { padding: 6px 14px; }
+    #moodSection {
+      display: none;
+      margin-top: 24px;
+      text-align: center;
+    }
+    .mood-hint {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -200,6 +265,29 @@ HTML_PAGE = """
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
     <button id="submitBtn" onclick="submit()">Find Movies</button>
     <button id="micBtn">🎤 Speak</button>
+    <div id="moodSection">
+      <p class="mood-hint">Fine-tune your vibe — pick a mood below and we’ll refresh the list:</p>
+      <div id="moodContainer" class="mood-container">
+        <button class="mood-btn" data-mood="happy">😊 Happy</button>
+        <button class="mood-btn" data-mood="sad">😢 Sad</button>
+        <button class="mood-btn" data-mood="tired">😴 Tired</button>
+        <button class="mood-btn" data-mood="intense">🤯 Intense</button>
+        <button class="mood-btn" data-mood="thoughtful">🧠 Thoughtful</button>
+        <button class="mood-btn" data-mood="romantic">💖 Romantic</button>
+      </div>
+    </div>
+
+    <div id="ageSection">
+      <p class="age-hint">Select the age group of your audience to refine further:</p>
+      <div id="ageContainer">
+        <button class="age-btn" data-age="Kids (0–7)">Kids</button>
+        <button class="age-btn" data-age="Tweens (8–12)">Tweens</button>
+        <button class="age-btn" data-age="Teens (13–17)">Teens</button>
+        <button class="age-btn" data-age="Adults (18+)">Adults</button>
+        <button class="age-btn" data-age="Seniors">Seniors</button>
+        <button class="age-btn" data-age="Mixed Family">Mixed&nbsp;Family</button>
+      </div>
+    </div>
     <div id="resultsGrid"></div>
     <div id="loading" class="loading" style="display:none;">Searching…</div>
   </main>
@@ -210,39 +298,14 @@ HTML_PAGE = """
         alert('Please describe your mood first!');
         return;
       }
-      const grid = document.getElementById('resultsGrid');
-      const loading = document.getElementById('loading');
-      grid.innerHTML = '';
-      loading.style.display = 'block';
-      try {
-        const resp = await fetch('/recommend', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_input, k: 20 })
-        });
-        if (!resp.ok) throw new Error(resp.statusText);
-        const data = await resp.json();
-        loading.style.display = 'none';
-        if (Array.isArray(data) && data.length) {
-          data.forEach((movie, idx) => {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
-            const img = document.createElement('img');
-            img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
-            card.appendChild(img);
-            const info = document.createElement('div');
-            info.className = 'movie-info';
-            info.innerHTML = `<div class="movie-title">${idx + 1}. ${movie.title}</div><div class="movie-reason">${movie.reason}</div>`;
-            card.appendChild(info);
-            grid.appendChild(card);
-          });
-        } else {
-          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
-        }
-      } catch (e) {
-        loading.style.display = 'none';
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
-      }
+      originalQuery = user_input;
+      selectedMood = '';
+      selectedAge = '';
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('moodSection').style.display = 'none';
+      document.getElementById('ageSection').style.display = 'none';
+      fetchRecommendations(buildFinalQuery());
     }
     document.getElementById('queryBox').addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.ctrlKey) submit();
@@ -290,34 +353,93 @@ HTML_PAGE = """
         const data = await resp.json();
         loading.style.display = 'none';
 
-        const recs = Array.isArray(data) ? data : data.recs;
-        const transcribed = Array.isArray(data) ? '' : (data.query || '');
-        if (transcribed) {
-          document.getElementById('queryBox').value = transcribed;
-        }
-
-        if (Array.isArray(recs) && recs.length) {
-          grid.innerHTML = '';
-          recs.forEach((movie, idx) => {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
-            const img = document.createElement('img');
-            img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
-            card.appendChild(img);
-            const info = document.createElement('div');
-            info.className = 'movie-info';
-            info.innerHTML = `<div class="movie-title">${idx + 1}. ${movie.title}</div><div class="movie-reason">${movie.reason}</div>`;
-            card.appendChild(info);
-            grid.appendChild(card);
-          });
-        } else {
-          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
-        }
+        originalQuery = data.query || '';
+        document.getElementById('queryBox').value = originalQuery;
+        renderResults(data.recs || []);
       } catch (e) {
         loading.style.display = 'none';
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
       }
     }
+
+    let originalQuery = '';
+    let selectedMood = '';
+    let selectedAge = '';
+
+    function buildFinalQuery() {
+      let query = originalQuery;
+      if (selectedMood) query += ' that matches a ' + selectedMood + ' mood';
+      if (selectedAge) query += ' and is suitable for ' + selectedAge.toLowerCase();
+      return query;
+    }
+
+    async function fetchRecommendations(queryText) {
+      const grid = document.getElementById('resultsGrid');
+      const loading = document.getElementById('loading');
+      grid.innerHTML = '';
+      loading.style.display = 'block';
+      try {
+        const resp = await fetch('/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input: queryText, k: 20 })
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+        const data = await resp.json();
+        loading.style.display = 'none';
+        renderResults(data);
+      } catch (e) {
+        loading.style.display = 'none';
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
+      }
+    }
+
+    function renderResults(recs) {
+      const grid = document.getElementById('resultsGrid');
+      if (Array.isArray(recs) && recs.length) {
+        grid.innerHTML = '';
+        recs.forEach((movie, idx) => {
+          const card = document.createElement('div');
+          card.className = 'movie-card';
+          const img = document.createElement('img');
+          img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
+          card.appendChild(img);
+          const info = document.createElement('div');
+          info.className = 'movie-info';
+          info.innerHTML = `<div class="movie-title">${idx + 1}. ${movie.title}</div><div class="movie-reason">${movie.reason}</div>`;
+          card.appendChild(info);
+          grid.appendChild(card);
+        });
+        document.getElementById('moodSection').style.display = 'block';
+        document.getElementById('ageSection').style.display = 'block';
+      } else {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
+      }
+    }
+  </script>
+  <!-- Mood button handling -->
+  <script>
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!originalQuery) return; // need an initial query first
+        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMood = btn.dataset.mood;
+        fetchRecommendations(buildFinalQuery());
+      });
+    });
+  </script>
+  <!-- Age button handling -->
+  <script>
+    document.querySelectorAll('.age-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!originalQuery) return;
+        document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedAge = btn.dataset.age;
+        fetchRecommendations(buildFinalQuery());
+      });
+    });
   </script>
 </body>
 </html>
