@@ -122,7 +122,7 @@ HTML_PAGE = """
       resize: vertical;
       margin-bottom: 12px;
     }
-    #submitBtn, #micBtn {
+    #submitBtn, #micBtn, #surpriseBtn {
       background: var(--accent);
       color: white;
       border: none;
@@ -138,11 +138,15 @@ HTML_PAGE = """
       justify-content: center;
       height: 48px;
     }
-    #micBtn { margin-left: 8px; }
+    #micBtn { margin-left:0; }
     #micBtn.rec {
       background: #1db954;
     }
     #submitBtn:hover, #micBtn:hover { opacity: .9; }
+    #surpriseBtn {background:#8e44ad;}
+    #actionButtons{display:flex;flex-direction:row;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+    #actionButtons button{width:auto;}
+    #surpriseBtn:hover{opacity:.9;}
     #resultsGrid {
       margin-top: 32px;
       display: grid;
@@ -264,15 +268,30 @@ HTML_PAGE = """
       text-align: left;
     }
     .summary-pill{background:#333;border-radius:16px;padding:6px 10px;font-size:.8rem;display:flex;align-items:center;gap:4px} .summary-pill button{background:none;border:none;color:#fff;cursor:pointer;font-size:.9rem}
+    /* Filter panel collapse */
+    .filters-container { transition: max-height .3s ease, opacity .3s ease, padding .3s ease, margin .3s ease; overflow:hidden; max-height:1000px; }
+    .filters-collapsed { max-height:0; padding:0!important; margin:0!important; opacity:0; pointer-events:none; }
+    .filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .filters-heading{font-size:1.1rem;font-weight:600;color:var(--text);margin:0;}
+    .filter-toggle{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:4px;transition:opacity .2s ease,transform .2s ease;}
+    .filter-toggle:hover{opacity:.9;transform:translateY(-1px);}
+    #filterPanel{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;margin-top:24px;box-shadow:0 4px 10px rgba(0,0,0,.4);}    
+    .filter-header{border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:14px;}
   </style>
 </head>
 <body>
   <header><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" class="logo" alt="Disney+ logo"/> VibeWatch</header>
   <main>
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
-    <button id="submitBtn" onclick="submit()">Find Movies</button>
-    <button id="micBtn">🎤 Speak</button>
-    <div id="moodSection" class="selector-card">
+    <div id="actionButtons">
+      <button id="surpriseBtn" onclick="surprise()">🎁 Surprise Me!</button>
+      <button id="submitBtn" onclick="submit()">Find Movies</button>
+      <button id="micBtn">🎤 Speak</button>
+    </div>
+    <div id="filterPanel" style="display:none;">
+      <div class="filter-header"><h3 class="filters-heading">🎛️ Filters</h3><button id="toggleFiltersBtn" class="filter-toggle">Hide Filters ⬆️</button></div>
+      <div id="filterContent" class="filters-container">
+      <div id="moodSection" class="selector-card">
       <h3 class="selector-title">🎭 Pick a Mood</h3>
       <div id="moodContainer" class="selector-row">
         <button class="mood-btn knob-btn" data-mood="happy"><span class="emoji">😊</span><span>Happy</span></button>
@@ -308,7 +327,9 @@ HTML_PAGE = """
         <button class="genre-btn knob-btn" data-genre="Animation">Animation</button>
         <button class="genre-btn knob-btn" data-genre="Horror">Horror</button>
       </div>
-    </div>
+    </div><!-- end genreSection -->
+      </div><!-- end filterContent -->
+      </div><!-- end filterPanel -->
     <div id="summaryBar" style="display:none;margin-top:16px;gap:8px;flex-wrap:wrap;" class="selector-row"></div>
     <div id="resultsGrid"></div>
     <div id="loading" class="loading" style="display:none;">Searching…</div>
@@ -394,6 +415,18 @@ HTML_PAGE = """
       }
     }
 
+    async function surprise(){
+       if(!originalQuery){
+         originalQuery='Surprise me';
+         document.getElementById('queryBox').value='';
+       }
+       let query=buildFinalQuery();
+       if(!query){query='Surprise me with a great movie';}
+       else{query+=' (surprise me)';}
+       await fetchRecommendations(query);
+       updateSummary();
+    }
+
     let originalQuery = '';
     let selectedMood = '';
     let selectedAge = '';
@@ -451,6 +484,8 @@ HTML_PAGE = """
           card.appendChild(info);
           grid.appendChild(card);
         });
+        const fp=document.getElementById('filterPanel');
+        if(fp.style.display==='none'){fp.style.display='block';}
         document.getElementById('moodSection').style.display = 'block';
         document.getElementById('ageSection').style.display = 'block';
         document.getElementById('genreSection').style.display = 'block';
@@ -508,6 +543,22 @@ HTML_PAGE = """
         }
         fetchRecommendations(buildFinalQuery());updateSummary();
       });
+    });
+  </script>
+  <script>
+    const toggleBtn=document.getElementById('toggleFiltersBtn');
+    const filterContent=document.getElementById('filterContent');
+    function setToggleLabel(){
+      toggleBtn.textContent=filterContent.classList.contains('filters-collapsed')?'Show Filters ⬇️':'Hide Filters ⬆️';
+    }
+    toggleBtn.addEventListener('click',()=>{
+      filterContent.classList.toggle('filters-collapsed');
+      setToggleLabel();
+      localStorage.setItem('filtersHidden',filterContent.classList.contains('filters-collapsed'));
+    });
+    document.addEventListener('DOMContentLoaded',()=>{
+      const saved=localStorage.getItem('filtersHidden')==='true';
+      if(saved){filterContent.classList.add('filters-collapsed');setToggleLabel();}
     });
   </script>
 </body>
