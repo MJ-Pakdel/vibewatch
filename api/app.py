@@ -244,6 +244,16 @@ HTML_PAGE = """
     #genreSection { display: none; }
     #moodSection, #ageSection { display:none; }
     .mood-hint, .age-hint { display:none; }
+    .selector-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      justify-content: flex-start;
+    }
   </style>
 </head>
 <body>
