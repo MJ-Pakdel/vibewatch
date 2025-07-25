@@ -122,7 +122,7 @@ HTML_PAGE = """
       resize: vertical;
       margin-bottom: 12px;
     }
-    #submitBtn {
+    #submitBtn, #micBtn {
       background: var(--accent);
       color: white;
       border: none;
@@ -132,19 +132,13 @@ HTML_PAGE = """
       border-radius: 6px;
       cursor: pointer;
       transition: opacity .2s ease;
+      min-width: 150px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
     }
-    #micBtn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 14px 20px;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: opacity .2s ease;
-      margin-left: 8px;
-    }
+    #micBtn { margin-left: 8px; }
     #micBtn.rec {
       background: #1db954;
     }
@@ -232,14 +226,14 @@ HTML_PAGE = """
     .age-btn  { font-size: .8rem; }
     .knob-btn .emoji { font-size: 1.4rem; }
     /* Age selector styles */
-    #ageContainer { flex-wrap: nowrap; overflow-x: auto; }
+    #ageContainer { flex-wrap: nowrap; overflow-x: auto; justify-content:center; }
     .age-btn {
       padding: 4px 12px;
       font-size: .75rem;
       white-space: nowrap;
     }
     /* Genre selector styles */
-    #genreContainer { flex-wrap: nowrap; overflow-x: auto; }
+    #genreContainer { flex-wrap: nowrap; overflow-x: auto; justify-content:center; }
     .genre-btn { font-size: .78rem; padding: 4px 14px; white-space: nowrap; }
     #genreSection { display: none; }
     #moodSection, #ageSection { display:none; }
@@ -254,6 +248,22 @@ HTML_PAGE = """
       scrollbar-width: thin;
       justify-content: flex-start;
     }
+    .selector-card {
+      background: #242424;
+      border-radius: 12px;
+      padding: 16px 12px;
+      margin-top: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .selector-card + .selector-card { margin-top: 16px; }
+    .selector-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 8px;
+      text-align: left;
+    }
+    .summary-pill{background:#333;border-radius:16px;padding:6px 10px;font-size:.8rem;display:flex;align-items:center;gap:4px} .summary-pill button{background:none;border:none;color:#fff;cursor:pointer;font-size:.9rem}
   </style>
 </head>
 <body>
@@ -277,12 +287,12 @@ HTML_PAGE = """
     <div id="ageSection" class="selector-card">
       <h3 class="selector-title">👥 Audience Age Group</h3>
       <div id="ageContainer" class="selector-row">
-        <button class="age-btn knob-btn" data-age="Kids (0–7)">Kids</button>
-        <button class="age-btn knob-btn" data-age="Tweens (8–12)">Tweens</button>
-        <button class="age-btn knob-btn" data-age="Teens (13–17)">Teens</button>
-        <button class="age-btn knob-btn" data-age="Adults (18+)">Adults</button>
-        <button class="age-btn knob-btn" data-age="Seniors">Seniors</button>
-        <button class="age-btn knob-btn" data-age="Mixed Family">Family</button>
+        <button class="age-btn knob-btn" data-age="Kids (0–7)">🧒 Kids</button>
+        <button class="age-btn knob-btn" data-age="Tweens (8–12)">👦 Tweens</button>
+        <button class="age-btn knob-btn" data-age="Teens (13–17)">👧 Teens</button>
+        <button class="age-btn knob-btn" data-age="Adults (18+)">👨 Adults</button>
+        <button class="age-btn knob-btn" data-age="Seniors">👵 Seniors</button>
+        <button class="age-btn knob-btn" data-age="Mixed Family">👨‍👩‍👧 Family</button>
       </div>
     </div>
 
@@ -299,6 +309,7 @@ HTML_PAGE = """
         <button class="genre-btn knob-btn" data-genre="Horror">Horror</button>
       </div>
     </div>
+    <div id="summaryBar" style="display:none;margin-top:16px;gap:8px;flex-wrap:wrap;" class="selector-row"></div>
     <div id="resultsGrid"></div>
     <div id="loading" class="loading" style="display:none;">Searching…</div>
   </main>
@@ -319,7 +330,7 @@ HTML_PAGE = """
       document.getElementById('moodSection').style.display = 'none';
       document.getElementById('ageSection').style.display = 'none';
       document.getElementById('genreSection').style.display = 'none';
-      fetchRecommendations(buildFinalQuery());
+      fetchRecommendations(buildFinalQuery());updateSummary();
     }
     document.getElementById('queryBox').addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.ctrlKey) submit();
@@ -361,7 +372,7 @@ HTML_PAGE = """
       try {
         const fd = new FormData();
         fd.append('file', blob, 'voice.webm');
-        fd.append('k', '20');
+        fd.append('k', '40');
         const resp = await fetch('/recommend_voice', { method: 'POST', body: fd });
         if (!resp.ok) {
           let detail = resp.statusText;
@@ -405,7 +416,7 @@ HTML_PAGE = """
         const resp = await fetch('/recommend', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_input: queryText, k: 20 })
+          body: JSON.stringify({ user_input: queryText, k: 40 })
         });
         if (!resp.ok) {
           let detail = resp.statusText;
@@ -461,7 +472,7 @@ HTML_PAGE = """
           btn.classList.add('selected');
           selectedMood = btn.dataset.mood;
         }
-        fetchRecommendations(buildFinalQuery());
+        fetchRecommendations(buildFinalQuery());updateSummary();
       });
     });
   </script>
@@ -478,7 +489,7 @@ HTML_PAGE = """
           btn.classList.add('selected');
           selectedAge = btn.dataset.age;
         }
-        fetchRecommendations(buildFinalQuery());
+        fetchRecommendations(buildFinalQuery());updateSummary();
       });
     });
   </script>
@@ -495,7 +506,7 @@ HTML_PAGE = """
           btn.classList.add('selected');
           selectedGenre = btn.dataset.genre;
         }
-        fetchRecommendations(buildFinalQuery());
+        fetchRecommendations(buildFinalQuery());updateSummary();
       });
     });
   </script>
