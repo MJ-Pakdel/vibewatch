@@ -143,10 +143,10 @@ HTML_PAGE = """
       background: #1db954;
     }
     #submitBtn:hover, #micBtn:hover { opacity: .9; }
-    #surpriseBtn {background:#8e44ad;}
+    #surpriseBtn {background:#8e44ad;display:none;}
+    #surpriseBtn:hover{opacity:.9;}
     #actionButtons{display:flex;flex-direction:row;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
     #actionButtons button{width:auto;}
-    #surpriseBtn:hover{opacity:.9;}
     #resultsGrid {
       margin-top: 32px;
       display: grid;
@@ -277,11 +277,15 @@ HTML_PAGE = """
     .filter-toggle:hover{opacity:.9;transform:translateY(-1px);}
     #filterPanel{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;margin-top:24px;box-shadow:0 4px 10px rgba(0,0,0,.4);}    
     .filter-header{border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:14px;}
+    #controls{position:sticky;top:0;background:#141414;padding-bottom:12px;z-index:100;border-bottom:1px solid #333;}
+    #controls textarea{margin-top:8px;}
+    #banner{display:none;background:#f39c12;color:#141414;text-align:center;padding:6px 12px;border-radius:6px;margin-top:8px;font-size:.9rem;}
   </style>
 </head>
 <body>
   <header><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" class="logo" alt="Disney+ logo"/> VibeWatch</header>
   <main>
+    <div id="controls">
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
     <div id="actionButtons">
       <button id="surpriseBtn" onclick="surprise()">🎁 Surprise Me!</button>
@@ -330,6 +334,8 @@ HTML_PAGE = """
     </div><!-- end genreSection -->
       </div><!-- end filterContent -->
       </div><!-- end filterPanel -->
+      <div id="banner">🎁 Surprise me mode activated! Enjoy a wildcard pick.</div>
+      </div><!-- end controls wrapper -->
     <div id="summaryBar" style="display:none;margin-top:16px;gap:8px;flex-wrap:wrap;" class="selector-row"></div>
     <div id="resultsGrid"></div>
     <div id="loading" class="loading" style="display:none;">Searching…</div>
@@ -338,7 +344,10 @@ HTML_PAGE = """
     async function submit() {
       const user_input = document.getElementById('queryBox').value.trim();
       if (!user_input) {
-        alert('Please describe your mood first!');
+        const banner=document.getElementById('banner');
+        banner.style.display='block';
+        await surprise();
+        setTimeout(()=>{banner.style.display='none';},3000);
         return;
       }
       originalQuery = user_input;
