@@ -6,7 +6,6 @@ import tempfile
 import openai
 
 from generator import VibeWatchRecommender
-from tmdb_client import fetch_poster_url
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "YOUR_OPENAI_API_KEY_HERE"
 
@@ -31,12 +30,8 @@ async def startup_event():
 async def recommend(req: RecommendRequest):
     try:
         recs = recommender.recommend(req.user_input, k=req.k)
-        # Enrich with poster URLs
-        for r in recs:
-            if "poster" not in r or not r.get("poster"):
-                poster = fetch_poster_url(r.get("title", ""))
-                if poster:
-                    r["poster"] = poster
+        # Note: poster URLs are now included in the metadata from our embedding system
+        # No need to fetch from external TMDB API anymore
         return recs
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -62,11 +57,7 @@ async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
 
         # Fetch recommendations via existing pipeline
         recs = recommender.recommend(query_text, k=k)
-        for r in recs:
-            if "poster" not in r or not r.get("poster"):
-                poster = fetch_poster_url(r.get("title", ""))
-                if poster:
-                    r["poster"] = poster
+        # Note: poster URLs are now included in the metadata from our embedding system
         return {"query": query_text, "recs": recs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

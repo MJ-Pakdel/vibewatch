@@ -7,7 +7,7 @@ from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-MOVIES_CSV = DATA_DIR / "movies_clean.csv"
+MOVIES_CSV = DATA_DIR / "movies_disney_hulu.csv"
 INDEX_DIR = DATA_DIR / "faiss_index"
 
 EMBED_MODEL = "text-embedding-3-small"
@@ -15,26 +15,90 @@ EMBED_MODEL = "text-embedding-3-small"
 
 def load_movies() -> pd.DataFrame:
     if not MOVIES_CSV.exists():
-        raise FileNotFoundError("movies_clean.csv not found. Run download_and_prepare_data.py first.")
+        raise FileNotFoundError("movies_disney_hulu.csv not found.")
     return pd.read_csv(MOVIES_CSV)
+
+
+def extract_poster_url(images_data):
+    """Extract poster URL from the images JSON data"""
+    if not images_data or pd.isna(images_data):
+        return None
+    
+    try:
+        # Handle different possible formats
+        images_str = str(images_data).strip()
+        
+        # Skip empty or 'nan' strings
+        if not images_str or images_str.lower() in ['nan', 'none', '']:
+            return None
+            
+        # Parse the JSON string
+        import ast, json
+        
+        # Try json.loads first (proper JSON)
+        try:
+            images_dict = json.loads(images_str)
+        except:
+            # Fall back to ast.literal_eval (Python literal)
+            images_dict = ast.literal_eval(images_str)
+        
+        # Get posters array
+        posters = images_dict.get("posters", [])
+        if posters and isinstance(posters, list) and len(posters) > 0:
+            # Return the full_url from the first poster
+            poster_url = posters[0].get("full_url")
+            if poster_url:
+                print(f"DEBUG: Extracted poster URL: {poster_url}")
+                return poster_url
+    except Exception as e:
+        print(f"DEBUG: Failed to parse images data: {e}")
+        print(f"DEBUG: Images data was: {repr(images_data)}")
+    
+    return None
 
 
 def create_documents(df: pd.DataFrame):
     docs = []
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
+        # Map new columns to expected format
+        # Use 'name' if 'title' is empty, otherwise use 'title'
+        title = row.get("title", "") or row.get("name", "")
+        
+        # Extract genres from JSON-like string format
+        genres_raw = row.get("genres", "")
+        if isinstance(genres_raw, str) and genres_raw.startswith("["):
+            try:
+                # Parse JSON-like genres format
+                import ast
+                genres_list = ast.literal_eval(genres_raw)
+                if isinstance(genres_list, list):
+                    genres = ", ".join([g.get("name", "") for g in genres_list if isinstance(g, dict)])
+                else:
+                    genres = str(genres_raw)
+            except:
+                genres = str(genres_raw)
+        else:
+            genres = str(genres_raw) if genres_raw else ""
+        
+        # Extract poster URL from images data
+        poster_url = extract_poster_url(row.get("images", ""))
+        
+        # Create text content for embedding
         text_parts = [
-            str(row.get("title", "")),
+            str(title),
             str(row.get("overview", "")),
-            str(row.get("genres", "")),
-            str(row.get("cast", "")),
-            str(row.get("director", "")),
+            str(genres),
+            str(row.get("tagline", "")),
         ]
-        text = " \n".join([p for p in text_parts if p and p != "nan"])
+        text = " \n".join([p for p in text_parts if p and p != "nan" and p.strip()])
+        
+        # Create metadata
         metadata = {
-            "id": int(row["id"]),
-            "title": row["title"],
-            "genres": row["genres"],
-            "overview": row["overview"],
+            "id": idx,  # Use row index as ID since there's no explicit ID column
+            "title": title,
+            "genres": genres,
+            "overview": str(row.get("overview", "")),
+            "poster": poster_url,  # Add poster URL to metadata
         }
         docs.append(Document(page_content=text, metadata=metadata))
     return docs

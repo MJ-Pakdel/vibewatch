@@ -35,7 +35,8 @@ class VibeWatchRecommender:
             try:
                 recs = json.loads(json_str)
                 if isinstance(recs, list):
-                    return recs
+                    # Enrich LLM recommendations with poster URLs from original docs
+                    return self._enrich_with_posters(recs, docs)
             except json.JSONDecodeError as e:
                 print(f"JSON parsing error: {e}")
         
@@ -43,11 +44,48 @@ class VibeWatchRecommender:
         try:
             recs = json.loads(content)
             if isinstance(recs, list):
-                return recs
+                # Enrich LLM recommendations with poster URLs from original docs
+                return self._enrich_with_posters(recs, docs)
         except json.JSONDecodeError as e:
             print(f"Full content JSON parsing error: {e}")
 
-        # Fallback: pass-through with docs
+        # Fallback: pass-through with docs (preserve all metadata including poster)
         return [
-            {"title": m.get("title", ""), "reason": "(LLM parsing failed)"} for m in docs[:3]
-        ] 
+            {
+                "title": m.get("title", ""), 
+                "reason": "(LLM parsing failed)",
+                "poster": m.get("poster")  # Preserve poster URL
+            } for m in docs[:3]
+        ]
+    
+    def _enrich_with_posters(self, recs: List[Dict], docs: List[Dict]) -> List[Dict]:
+        """Enrich LLM recommendations with poster URLs by matching titles"""
+        # Create a lookup map from title to poster URL
+        title_to_poster = {doc.get("title", ""): doc.get("poster") for doc in docs}
+        
+        # Debug: print available titles and their poster status
+        print("DEBUG: Available titles and posters:")
+        for title, poster in title_to_poster.items():
+            poster_status = "✓ HAS POSTER" if poster else "✗ NO POSTER"
+            print(f"  '{title}' -> {poster_status}")
+            if poster:
+                print(f"    URL: {poster}")
+        
+        print("DEBUG: LLM recommended titles:")
+        # Add poster URLs to recommendations
+        for rec in recs:
+            title = rec.get("title", "")
+            print(f"  Looking for: '{title}'")
+            if title in title_to_poster:
+                rec["poster"] = title_to_poster[title]
+                print(f"    ✓ MATCHED -> {title_to_poster[title]}")
+            else:
+                print(f"    ✗ NO MATCH FOUND")
+                # Try fuzzy matching
+                for doc_title in title_to_poster:
+                    if title.lower() in doc_title.lower() or doc_title.lower() in title.lower():
+                        rec["poster"] = title_to_poster[doc_title]
+                        print(f"    ~ FUZZY MATCH: '{title}' -> '{doc_title}' -> {title_to_poster[doc_title]}")
+                        break
+        
+        return recs 
