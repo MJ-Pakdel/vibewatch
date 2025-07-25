@@ -83,7 +83,10 @@ class VibeWatchRecommender:
                 print(f"    ✗ NO MATCH FOUND")
                 # Try fuzzy matching
                 for doc_title in title_to_poster:
-                    if title.lower() in doc_title.lower() or doc_title.lower() in title.lower():
+                    # Safely compare by casting to string to avoid errors if title is not str
+                    title_str = str(title).lower()
+                    doc_title_str = str(doc_title).lower()
+                    if title_str in doc_title_str or doc_title_str in title_str:
                         rec["poster"] = title_to_poster[doc_title]
                         print(f"    ~ FUZZY MATCH: '{title}' -> '{doc_title}' -> {title_to_poster[doc_title]}")
                         break

@@ -224,39 +224,26 @@ HTML_PAGE = """
       color: #fff;
       box-shadow: 0 0 10px rgba(229,9,20,0.6);
     }
+    .selector-row .knob-btn { flex: 0 0 auto; margin-right: 8px; }
+    .selector-row .knob-btn:last-child { margin-right: 0; }
 
     /* Specific tweaks */
     .mood-btn { font-size: .9rem; }
     .age-btn  { font-size: .8rem; }
-    .mood-btn span.emoji { font-size: 1.1rem; }
+    .knob-btn .emoji { font-size: 1.4rem; }
     /* Age selector styles */
-    #ageSection {
-      display: none;
-      margin-top: 16px;
-      text-align: center;
+    #ageContainer { flex-wrap: nowrap; overflow-x: auto; }
+    .age-btn {
+      padding: 4px 12px;
+      font-size: .75rem;
+      white-space: nowrap;
     }
-    .age-hint {
-      color: var(--muted);
-      font-size: .9rem;
-      margin-bottom: 8px;
-    }
-    #ageContainer {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .age-btn { padding: 6px 14px; }
-    #moodSection {
-      display: none;
-      margin-top: 24px;
-      text-align: center;
-    }
-    .mood-hint {
-      color: var(--muted);
-      font-size: .9rem;
-      margin-bottom: 8px;
-    }
+    /* Genre selector styles */
+    #genreContainer { flex-wrap: nowrap; overflow-x: auto; }
+    .genre-btn { font-size: .78rem; padding: 4px 14px; white-space: nowrap; }
+    #genreSection { display: none; }
+    #moodSection, #ageSection { display:none; }
+    .mood-hint, .age-hint { display:none; }
   </style>
 </head>
 <body>
@@ -265,27 +252,41 @@ HTML_PAGE = """
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
     <button id="submitBtn" onclick="submit()">Find Movies</button>
     <button id="micBtn">🎤 Speak</button>
-    <div id="moodSection">
-      <p class="mood-hint">Fine-tune your vibe — pick a mood below and we’ll refresh the list:</p>
-      <div id="moodContainer" class="mood-container">
-        <button class="mood-btn" data-mood="happy">😊 Happy</button>
-        <button class="mood-btn" data-mood="sad">😢 Sad</button>
-        <button class="mood-btn" data-mood="tired">😴 Tired</button>
-        <button class="mood-btn" data-mood="intense">🤯 Intense</button>
-        <button class="mood-btn" data-mood="thoughtful">🧠 Thoughtful</button>
-        <button class="mood-btn" data-mood="romantic">💖 Romantic</button>
+    <div id="moodSection" class="selector-card">
+      <h3 class="selector-title">🎭 Pick a Mood</h3>
+      <div id="moodContainer" class="selector-row">
+        <button class="mood-btn knob-btn" data-mood="happy"><span class="emoji">😊</span><span>Happy</span></button>
+        <button class="mood-btn knob-btn" data-mood="sad"><span class="emoji">😢</span><span>Sad</span></button>
+        <button class="mood-btn knob-btn" data-mood="tired"><span class="emoji">😴</span><span>Tired</span></button>
+        <button class="mood-btn knob-btn" data-mood="intense"><span class="emoji">🤯</span><span>Intense</span></button>
+        <button class="mood-btn knob-btn" data-mood="thoughtful"><span class="emoji">🧠</span><span>Thoughtful</span></button>
+        <button class="mood-btn knob-btn" data-mood="romantic"><span class="emoji">💖</span><span>Romantic</span></button>
       </div>
     </div>
 
-    <div id="ageSection">
-      <p class="age-hint">Select the age group of your audience to refine further:</p>
-      <div id="ageContainer">
-        <button class="age-btn" data-age="Kids (0–7)">Kids</button>
-        <button class="age-btn" data-age="Tweens (8–12)">Tweens</button>
-        <button class="age-btn" data-age="Teens (13–17)">Teens</button>
-        <button class="age-btn" data-age="Adults (18+)">Adults</button>
-        <button class="age-btn" data-age="Seniors">Seniors</button>
-        <button class="age-btn" data-age="Mixed Family">Mixed&nbsp;Family</button>
+    <div id="ageSection" class="selector-card">
+      <h3 class="selector-title">👥 Audience Age Group</h3>
+      <div id="ageContainer" class="selector-row">
+        <button class="age-btn knob-btn" data-age="Kids (0–7)">Kids</button>
+        <button class="age-btn knob-btn" data-age="Tweens (8–12)">Tweens</button>
+        <button class="age-btn knob-btn" data-age="Teens (13–17)">Teens</button>
+        <button class="age-btn knob-btn" data-age="Adults (18+)">Adults</button>
+        <button class="age-btn knob-btn" data-age="Seniors">Seniors</button>
+        <button class="age-btn knob-btn" data-age="Mixed Family">Family</button>
+      </div>
+    </div>
+
+    <div id="genreSection" class="selector-card">
+      <h3 class="selector-title">🎬 Genre</h3>
+      <div id="genreContainer" class="selector-row">
+        <button class="genre-btn knob-btn" data-genre="Action">Action</button>
+        <button class="genre-btn knob-btn" data-genre="Comedy">Comedy</button>
+        <button class="genre-btn knob-btn" data-genre="Drama">Drama</button>
+        <button class="genre-btn knob-btn" data-genre="Romance">Romance</button>
+        <button class="genre-btn knob-btn" data-genre="Thriller">Thriller</button>
+        <button class="genre-btn knob-btn" data-genre="Sci-Fi">Sci-Fi</button>
+        <button class="genre-btn knob-btn" data-genre="Animation">Animation</button>
+        <button class="genre-btn knob-btn" data-genre="Horror">Horror</button>
       </div>
     </div>
     <div id="resultsGrid"></div>
@@ -301,10 +302,13 @@ HTML_PAGE = """
       originalQuery = user_input;
       selectedMood = '';
       selectedAge = '';
+      selectedGenre = '';
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
       document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
       document.getElementById('moodSection').style.display = 'none';
       document.getElementById('ageSection').style.display = 'none';
+      document.getElementById('genreSection').style.display = 'none';
       fetchRecommendations(buildFinalQuery());
     }
     document.getElementById('queryBox').addEventListener('keydown', e => {
@@ -349,7 +353,14 @@ HTML_PAGE = """
         fd.append('file', blob, 'voice.webm');
         fd.append('k', '20');
         const resp = await fetch('/recommend_voice', { method: 'POST', body: fd });
-        if (!resp.ok) throw new Error(resp.statusText);
+        if (!resp.ok) {
+          let detail = resp.statusText;
+          try {
+            const errJson = await resp.json();
+            if (errJson && errJson.detail) detail = errJson.detail;
+          } catch {}
+          throw new Error(detail || `Server error (${resp.status})`);
+        }
         const data = await resp.json();
         loading.style.display = 'none';
 
@@ -358,18 +369,20 @@ HTML_PAGE = """
         renderResults(data.recs || []);
       } catch (e) {
         loading.style.display = 'none';
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">${e.message || 'Something went wrong. Please try again later.'}</div>`;
       }
     }
 
     let originalQuery = '';
     let selectedMood = '';
     let selectedAge = '';
+    let selectedGenre = '';
 
     function buildFinalQuery() {
       let query = originalQuery;
       if (selectedMood) query += ' that matches a ' + selectedMood + ' mood';
       if (selectedAge) query += ' and is suitable for ' + selectedAge.toLowerCase();
+      if (selectedGenre) query += ' with ' + selectedGenre.toLowerCase() + ' genre';
       return query;
     }
 
@@ -384,13 +397,20 @@ HTML_PAGE = """
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_input: queryText, k: 20 })
         });
-        if (!resp.ok) throw new Error(resp.statusText);
+        if (!resp.ok) {
+          let detail = resp.statusText;
+          try {
+            const errJson = await resp.json();
+            if (errJson && errJson.detail) detail = errJson.detail;
+          } catch {}
+          throw new Error(detail || `Server error (${resp.status})`);
+        }
         const data = await resp.json();
         loading.style.display = 'none';
         renderResults(data);
       } catch (e) {
         loading.style.display = 'none';
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">Error: ${e.message}</div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--accent);">${e.message || 'Something went wrong. Please try again later.'}</div>`;
       }
     }
 
@@ -402,7 +422,7 @@ HTML_PAGE = """
           const card = document.createElement('div');
           card.className = 'movie-card';
           const img = document.createElement('img');
-          img.src = movie.poster || 'https://via.placeholder.com/300x450/000000/FFFFFF/?text=' + encodeURIComponent(movie.title);
+          img.src = movie.poster || 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg';
           card.appendChild(img);
           const info = document.createElement('div');
           info.className = 'movie-info';
@@ -412,6 +432,7 @@ HTML_PAGE = """
         });
         document.getElementById('moodSection').style.display = 'block';
         document.getElementById('ageSection').style.display = 'block';
+        document.getElementById('genreSection').style.display = 'block';
       } else {
         grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No recommendations found.</div>';
       }
@@ -422,9 +443,14 @@ HTML_PAGE = """
     document.querySelectorAll('.mood-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!originalQuery) return; // need an initial query first
-        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedMood = btn.dataset.mood;
+        if (btn.classList.contains('selected')) {
+          btn.classList.remove('selected');
+          selectedMood = '';
+        } else {
+          document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedMood = btn.dataset.mood;
+        }
         fetchRecommendations(buildFinalQuery());
       });
     });
@@ -434,9 +460,31 @@ HTML_PAGE = """
     document.querySelectorAll('.age-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!originalQuery) return;
-        document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedAge = btn.dataset.age;
+        if (btn.classList.contains('selected')) {
+          btn.classList.remove('selected');
+          selectedAge = '';
+        } else {
+          document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedAge = btn.dataset.age;
+        }
+        fetchRecommendations(buildFinalQuery());
+      });
+    });
+  </script>
+  <!-- Genre button handling -->
+  <script>
+    document.querySelectorAll('.genre-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!originalQuery) return;
+        if (btn.classList.contains('selected')) {
+          btn.classList.remove('selected');
+          selectedGenre = '';
+        } else {
+          document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedGenre = btn.dataset.genre;
+        }
         fetchRecommendations(buildFinalQuery());
       });
     });
