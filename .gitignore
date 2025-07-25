@@ -7,3 +7,35 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Terraform variable files
+*.tfvars
+*.auto.tfvars
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform lock files
+.terraform.lock.hcl
+
+# Terraform directories
+.terraform/
+
+# Terraform plan files
+*.tfplan
+*.tfplan.*
+
+# Override files as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Crash log files
+crash.log
+crash.*.log
