@@ -12,10 +12,6 @@ provider "aws" {
   region = var.region
 }
 
-locals {
-  openai_api_key = var.openai_api_key
-}
-
 data "aws_ami" "al2023" {
   most_recent = true
   owners      = ["amazon"]
@@ -54,11 +50,77 @@ resource "aws_security_group" "sg" {
   }
 }
 
+resource "aws_iam_role" "vibewatch_role" {
+  name = "vibewatch-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "vibewatch_ssm_policy" {
+  name = "vibewatch-ssm-policy"
+  role = aws_iam_role.vibewatch_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = "arn:aws:ssm:*:*:parameter/vibewatch/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "vibewatch_cloudwatch_policy" {
+  name = "vibewatch-cloudwatch-policy"
+  role = aws_iam_role.vibewatch_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = [
+          "arn:aws:logs:*:*:log-group:/aws/vibewatch/*",
+          "arn:aws:logs:*:*:log-group:/aws/vibewatch/*:log-stream:*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "vibewatch_profile" {
+  name = "vibewatch-profile"
+  role = aws_iam_role.vibewatch_role.name
+}
+
 resource "aws_instance" "vibewatch" {
   ami                    = data.aws_ami.al2023.id
   instance_type          = "t3.medium"
   key_name               = "debug-vibewatch"
   vpc_security_group_ids = [aws_security_group.sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.vibewatch_profile.name
 
   user_data = <<-EOF
     #!/bin/bash
@@ -74,7 +136,7 @@ resource "aws_instance" "vibewatch" {
     yum update -y
     
     echo "=== Installing packages ==="
-    yum install -y git python3
+    yum install -y git python3 amazon-cloudwatch-agent
     
     echo "=== Cloning repository ==="
     git clone https://github.com/MJ-Pakdel/vibewatch.git /opt/vibewatch
@@ -92,20 +154,53 @@ resource "aws_instance" "vibewatch" {
     cat requirements.txt
     pip install -r requirements.txt "uvicorn[standard]"
     
-    echo "=== Setting up OpenAI key ==="
-    echo "export OPENAI_API_KEY=${local.openai_api_key}" > /etc/profile.d/openai.sh
-    echo "export OPENAI_API_KEY=${local.openai_api_key}" >> /etc/environment
-    export OPENAI_API_KEY=${local.openai_api_key}
+    echo "=== Fetching OpenAI key from Parameter Store ==="
+    OPENAI_API_KEY=$(aws ssm get-parameter --name "/vibewatch/openai-api-key" --with-decryption --query Parameter.Value --output text --region us-east-1)
+    echo "export OPENAI_API_KEY=$OPENAI_API_KEY" > /etc/profile.d/openai.sh
+    echo "export OPENAI_API_KEY=$OPENAI_API_KEY" >> /etc/environment
+    export OPENAI_API_KEY=$OPENAI_API_KEY
     echo "OpenAI key configured successfully"
+    
+    echo "=== Configuring CloudWatch Agent ==="
+    cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CW_CONFIG'
+    {
+      "agent": {
+        "metrics_collection_interval": 60,
+        "logfile": "/var/log/amazon-cloudwatch-agent.log"
+      },
+      "logs": {
+        "logs_collected": {
+          "files": {
+            "collect_list": [
+              {
+                "file_path": "/var/log/user-data.log",
+                "log_group_name": "/aws/vibewatch/user-data",
+                "log_stream_name": "{instance_id}",
+                "timezone": "UTC"
+              },
+              {
+                "file_path": "/var/log/uvicorn.log",
+                "log_group_name": "/aws/vibewatch/uvicorn",
+                "log_stream_name": "{instance_id}",
+                "timezone": "UTC"
+              }
+            ]
+          }
+        }
+      }
+    }
+    CW_CONFIG
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+    echo "CloudWatch Agent started"
     
     echo "=== Creating startup script ==="
     cat > /opt/start_vibewatch.sh << 'SCRIPT_EOF'
-#!/bin/bash
-cd /opt/vibewatch
-source /opt/vibe-venv/bin/activate
-export OPENAI_API_KEY=${local.openai_api_key}
-exec uvicorn api.app:app --host 0.0.0.0 --port 80
-SCRIPT_EOF
+    #!/bin/bash
+    cd /opt/vibewatch
+    source /opt/vibe-venv/bin/activate
+    export OPENAI_API_KEY=$(aws ssm get-parameter --name "/vibewatch/openai-api-key" --with-decryption --query Parameter.Value --output text --region us-east-1)
+    exec uvicorn api.app:app --host 0.0.0.0 --port 80
+    SCRIPT_EOF
     chmod +x /opt/start_vibewatch.sh
     
     echo "=== Testing FastAPI app ==="
@@ -127,4 +222,4 @@ SCRIPT_EOF
   tags = {
     Name = "vibewatch"
   }
-} 
+}
