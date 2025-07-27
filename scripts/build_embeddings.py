@@ -62,7 +62,14 @@ def create_documents(df: pd.DataFrame):
     for idx, row in df.iterrows():
         # Map new columns to expected format
         # Use 'name' if 'title' is empty, otherwise use 'title'
-        title = row.get("title", "") or row.get("name", "")
+        title_raw = row.get("title", "") or row.get("name", "")
+        
+        # Handle NaN/None values and convert to string safely
+        if pd.isna(title_raw) or not title_raw or str(title_raw).strip() in ['nan', 'None', '']:
+            print(f"DEBUG: Skipping movie at index {idx} - no valid title (title_raw: {repr(title_raw)})")
+            continue  # Skip movies without valid titles
+            
+        title = str(title_raw).strip()
         
         # Extract genres from JSON-like string format
         genres_raw = row.get("genres", "")
@@ -83,21 +90,27 @@ def create_documents(df: pd.DataFrame):
         # Extract poster URL from images data
         poster_url = extract_poster_url(row.get("images", ""))
         
-        # Create text content for embedding
+        # Create text content for embedding - safely handle NaN values
+        def safe_str(value):
+            if pd.isna(value) or value is None:
+                return ""
+            str_val = str(value).strip()
+            return str_val if str_val not in ['nan', 'None'] else ""
+        
         text_parts = [
-            str(title),
-            str(row.get("overview", "")),
-            str(genres),
-            str(row.get("tagline", "")),
+            safe_str(title),
+            safe_str(row.get("overview", "")),
+            safe_str(genres),
+            safe_str(row.get("tagline", "")),
         ]
-        text = " \n".join([p for p in text_parts if p and p != "nan" and p.strip()])
+        text = " \n".join([p for p in text_parts if p and p.strip()])
         
         # Create metadata
         metadata = {
             "id": idx,  # Use row index as ID since there's no explicit ID column
             "title": title,
             "genres": genres,
-            "overview": str(row.get("overview", "")),
+            "overview": safe_str(row.get("overview", "")),
             "poster": poster_url,  # Add poster URL to metadata
         }
         docs.append(Document(page_content=text, metadata=metadata))

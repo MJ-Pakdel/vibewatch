@@ -76,6 +76,10 @@ class VibeWatchRecommender:
         for rec in recs:
             title = rec.get("title", "")
             print(f"  Looking for: '{title}'")
+            
+            # Initialize poster as None to ensure the key always exists
+            rec["poster"] = None
+            
             if title in title_to_poster:
                 rec["poster"] = title_to_poster[title]
                 print(f"    ✓ MATCHED -> {title_to_poster[title]}")
@@ -87,5 +91,9 @@ class VibeWatchRecommender:
                         rec["poster"] = title_to_poster[doc_title]
                         print(f"    ~ FUZZY MATCH: '{title}' -> '{doc_title}' -> {title_to_poster[doc_title]}")
                         break
+                
+                # If still no poster found, keep it as None (but key exists)
+                if rec["poster"] is None:
+                    print(f"    ✗ NO POSTER AVAILABLE - will use placeholder")
         
         return recs 
