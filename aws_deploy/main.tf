@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 locals {
-  openai_api_key = "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"
+  openai_api_key = var.openai_api_key
 }
 
 data "aws_ami" "al2023" {
@@ -56,33 +56,72 @@ resource "aws_security_group" "sg" {
 
 resource "aws_instance" "vibewatch" {
   ami                    = data.aws_ami.al2023.id
-  instance_type          = "t3.micro"
-  key_name               = "vibewatch"
+  instance_type          = "t3.medium"
+  key_name               = "debug-vibewatch"
   vpc_security_group_ids = [aws_security_group.sg.id]
 
   user_data = <<-EOF
     #!/bin/bash
-    set -eux
-
+    set -e
+    
+    # Redirect all output to a log file
+    exec > >(tee /var/log/user-data.log)
+    exec 2>&1
+    
+    echo "=== Starting user-data script at $(date) ==="
+    
+    echo "=== Updating system ==="
     yum update -y
-    yum install -y git python3 python3-venv
-
-    # Clone repo
-    git clone https://github.com/<YOUR-GH-USER>/vibewatch.git /opt/vibewatch
-
-    # Set up virtual environment and install deps
+    
+    echo "=== Installing packages ==="
+    yum install -y git python3
+    
+    echo "=== Cloning repository ==="
+    git clone https://github.com/MJ-Pakdel/vibewatch.git /opt/vibewatch
+    ls -la /opt/vibewatch/
+    
+    echo "=== Setting up virtual environment ==="
     python3 -m venv /opt/vibe-venv
     source /opt/vibe-venv/bin/activate
+    
+    echo "=== Upgrading pip ==="
     pip install --upgrade pip
-    pip install -r /opt/vibewatch/requirements.txt "uvicorn[standard]"
-
-    # Configure OpenAI key
-    echo "export OPENAI_API_KEY=${local.openai_api_key}" > /etc/profile.d/openai.sh
-    export OPENAI_API_KEY=${local.openai_api_key}
-
-    # Run the API on port 80
+    
+    echo "=== Installing requirements ==="
     cd /opt/vibewatch
-    nohup uvicorn api.app:app --host 0.0.0.0 --port 80 &
+    cat requirements.txt
+    pip install -r requirements.txt "uvicorn[standard]"
+    
+    echo "=== Setting up OpenAI key ==="
+    echo "export OPENAI_API_KEY=${local.openai_api_key}" > /etc/profile.d/openai.sh
+    echo "export OPENAI_API_KEY=${local.openai_api_key}" >> /etc/environment
+    export OPENAI_API_KEY=${local.openai_api_key}
+    echo "OpenAI key configured successfully"
+    
+    echo "=== Creating startup script ==="
+    cat > /opt/start_vibewatch.sh << 'SCRIPT_EOF'
+#!/bin/bash
+cd /opt/vibewatch
+source /opt/vibe-venv/bin/activate
+export OPENAI_API_KEY=${local.openai_api_key}
+exec uvicorn api.app:app --host 0.0.0.0 --port 80
+SCRIPT_EOF
+    chmod +x /opt/start_vibewatch.sh
+    
+    echo "=== Testing FastAPI app ==="
+    python -c "from api.app import app; print('App imported successfully')"
+    
+    echo "=== Starting uvicorn server ==="
+    nohup /opt/start_vibewatch.sh > /var/log/uvicorn.log 2>&1 &
+    
+    echo "=== Waiting for server to start ==="
+    sleep 10
+    
+    echo "=== Testing server locally ==="
+    curl -f http://localhost:80 || echo "Local server test failed"
+    
+    echo "=== User-data script completed at $(date) ==="
+    echo "=== Check /var/log/uvicorn.log for server logs ==="
   EOF
 
   tags = {
