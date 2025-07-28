@@ -30,6 +30,7 @@ async def startup_event():
 @app.post("/recommend")
 async def recommend(req: RecommendRequest):
     try:
+        print(f"DEBUG - /recommend received: query='{req.user_input}' | k={req.k}")
         recs = recommender.recommend(req.user_input, k=req.k)
         # Note: poster URLs are now included in the metadata from our embedding system
         # No need to fetch from external TMDB API anymore
@@ -59,6 +60,7 @@ async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
         )
         query_text = resp.text
 
+        print(f"DEBUG - /recommend_voice transcription: '{query_text}' | k={k}")
         # Fetch recommendations via existing pipeline
         recs = recommender.recommend(query_text, k=k)
         # Note: poster URLs are now included in the metadata from our embedding system

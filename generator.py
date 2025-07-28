@@ -22,9 +22,6 @@ class VibeWatchRecommender:
         messages: List[BaseMessage] = prompt.to_messages()
         response = self.llm(messages)
 
-        # Debug: print the raw response
-        print(f"Raw LLM response: {response.content}")
-
         # Try to extract JSON from the response
         content = response.content.strip()
         
