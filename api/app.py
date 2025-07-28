@@ -11,6 +11,7 @@ from openai import OpenAI
 
 # Local imports
 from generator import VibeWatchRecommender
+import db
 
 # ---------------------------------------------------------------------------
 # Logging configuration
@@ -42,6 +43,7 @@ async def startup_event():
         logger.warning("OPENAI_API_KEY not set. Recommender will likely fail.")
     global openai_client
     recommender = VibeWatchRecommender(openai_api_key=OPENAI_API_KEY)
+    db.init_db()
     openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 
@@ -49,6 +51,7 @@ async def startup_event():
 async def recommend(req: RecommendRequest):
     try:
         print(f"DEBUG - /recommend received: query='{req.user_input}' | k={req.k}")
+        db.log_query('/recommend', req.user_input)
         recs = recommender.recommend(req.user_input, k=req.k)
         # Note: poster URLs are now included in the metadata from our embedding system
         # No need to fetch from external TMDB API anymore
@@ -80,6 +83,7 @@ async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
         query_text = resp.text
 
         print(f"DEBUG - /recommend_voice transcription: '{query_text}' | k={k}")
+        db.log_query('/recommend_voice', query_text)
         # Fetch recommendations via existing pipeline
         recs = recommender.recommend(query_text, k=k)
         # Note: poster URLs are now included in the metadata from our embedding system
