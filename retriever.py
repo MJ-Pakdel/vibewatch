@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 DATA_DIR = Path(__file__).resolve().parent / "data"

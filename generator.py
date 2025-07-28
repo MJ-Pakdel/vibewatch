@@ -2,11 +2,22 @@ import json
 import re
 from typing import List, Dict
 
+# Third-party
 from langchain_openai import ChatOpenAI
 from langchain.schema import BaseMessage
 
+# Standard library
+import logging
+
+# Local imports
 import retriever
 from prompting import PROMPT_TEMPLATE
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+logger = logging.getLogger(__name__)
 
 
 class VibeWatchRecommender:
@@ -22,6 +33,8 @@ class VibeWatchRecommender:
         messages: List[BaseMessage] = prompt.to_messages()
         response = self.llm(messages)
 
+        # Debug: log the raw response
+        logger.debug("Raw LLM response: %s", response.content)
         # Try to extract JSON from the response
         content = response.content.strip()
         
@@ -35,7 +48,7 @@ class VibeWatchRecommender:
                     # Enrich LLM recommendations with poster URLs from original docs
                     return self._enrich_with_posters(recs, docs)
             except json.JSONDecodeError as e:
-                print(f"JSON parsing error: {e}")
+                logger.debug("JSON parsing error: %s", e)
         
         # Try parsing the entire content as JSON
         try:
@@ -44,7 +57,7 @@ class VibeWatchRecommender:
                 # Enrich LLM recommendations with poster URLs from original docs
                 return self._enrich_with_posters(recs, docs)
         except json.JSONDecodeError as e:
-            print(f"Full content JSON parsing error: {e}")
+            logger.debug("Full content JSON parsing error: %s", e)
 
         # Fallback: pass-through with docs (preserve all metadata including poster)
         return [
@@ -60,24 +73,28 @@ class VibeWatchRecommender:
         # Create a lookup map from title to poster URL
         title_to_poster = {doc.get("title", ""): doc.get("poster") for doc in docs}
         
-        # Debug: print available titles and their poster status
-        print("DEBUG: Available titles and posters:")
+        # Debug: log available titles and their poster status
+        logger.debug("Available titles and posters:")
         for title, poster in title_to_poster.items():
             poster_status = "✓ HAS POSTER" if poster else "✗ NO POSTER"
-            print(f"  '{title}' -> {poster_status}")
+            logger.debug("  '%s' -> %s", title, poster_status)
             if poster:
-                print(f"    URL: {poster}")
+                logger.debug("    URL: %s", poster)
         
-        print("DEBUG: LLM recommended titles:")
+        logger.debug("LLM recommended titles:")
         # Add poster URLs to recommendations
         for rec in recs:
             title = rec.get("title", "")
-            print(f"  Looking for: '{title}'")
+            logger.debug("  Looking for: '%s'", title)
+            
+            # Initialize poster as None to ensure the key always exists
+            rec["poster"] = None
+            
             if title in title_to_poster:
                 rec["poster"] = title_to_poster[title]
-                print(f"    ✓ MATCHED -> {title_to_poster[title]}")
+                logger.debug("    ✓ MATCHED -> %s", title_to_poster[title])
             else:
-                print(f"    ✗ NO MATCH FOUND")
+                logger.debug("    ✗ NO MATCH FOUND")
                 # Try fuzzy matching
                 for doc_title in title_to_poster:
                     # Safely compare by casting to string to avoid errors if title is not str
@@ -85,7 +102,11 @@ class VibeWatchRecommender:
                     doc_title_str = str(doc_title).lower()
                     if title_str in doc_title_str or doc_title_str in title_str:
                         rec["poster"] = title_to_poster[doc_title]
-                        print(f"    ~ FUZZY MATCH: '{title}' -> '{doc_title}' -> {title_to_poster[doc_title]}")
+                        logger.debug("    ~ FUZZY MATCH: '%s' -> '%s' -> %s", title, doc_title, title_to_poster[doc_title])
                         break
+                
+                # If still no poster found, keep it as None (but key exists)
+                if rec["poster"] is None:
+                    logger.debug("    ✗ NO POSTER AVAILABLE - will use placeholder")
         
         return recs 

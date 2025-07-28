@@ -1,11 +1,29 @@
+# Standard library
+import logging
+import os
+import tempfile
+
+# Third-party
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-import os
-import tempfile
 from openai import OpenAI
 
+# Local imports
 from generator import VibeWatchRecommender
+
+# ---------------------------------------------------------------------------
+# Logging configuration
+# ---------------------------------------------------------------------------
+# You can control the log verbosity via the LOG_LEVEL env-var (default: INFO).
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "YOUR_OPENAI_API_KEY_HERE"
 
@@ -21,7 +39,7 @@ class RecommendRequest(BaseModel):
 async def startup_event():
     global recommender
     if OPENAI_API_KEY == "YOUR_OPENAI_API_KEY_HERE":
-        print("WARNING: OPENAI_API_KEY not set. Recommender will likely fail.")
+        logger.warning("OPENAI_API_KEY not set. Recommender will likely fail.")
     global openai_client
     recommender = VibeWatchRecommender(openai_api_key=OPENAI_API_KEY)
     openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -36,6 +54,7 @@ async def recommend(req: RecommendRequest):
         # No need to fetch from external TMDB API anymore
         return recs
     except Exception as e:
+        logger.exception("Error processing /recommend request")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -66,6 +85,7 @@ async def recommend_voice(file: UploadFile = File(...), k: int = Form(10)):
         # Note: poster URLs are now included in the metadata from our embedding system
         return {"query": query_text, "recs": recs}
     except Exception as e:
+        logger.exception("Error processing /recommend_voice request")
         raise HTTPException(status_code=500, detail=str(e))
 
 
