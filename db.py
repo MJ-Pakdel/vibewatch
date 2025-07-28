@@ -1,13 +1,19 @@
+# Python 3.9-compatible type hints
+from __future__ import annotations
+
 import sqlite3
 import datetime
 import threading
 from pathlib import Path
+from typing import Optional, Union
+
 
 _db_lock = threading.Lock()
-_conn: sqlite3.Connection | None = None
+# Use Optional for pre-3.10 compatibility
+_conn: Optional[sqlite3.Connection] = None
 
 
-def init_db(db_path: str | Path = "data/queries.db"):
+def init_db(db_path: Union[str, Path] = "data/queries.db"):
     """Initialise SQLite database and ensure table exists."""
     global _conn
     db_path = Path(db_path)
@@ -26,6 +32,7 @@ def init_db(db_path: str | Path = "data/queries.db"):
     _conn.commit()
 
 
+# No change needed here – Python 3.9 supports plain str annotations
 def log_query(endpoint: str, query: str):
     """Persist a query + endpoint + UTC timestamp."""
     if _conn is None:
