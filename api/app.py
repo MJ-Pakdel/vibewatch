@@ -6,6 +6,7 @@ import tempfile
 # Third-party
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from openai import OpenAI
 
@@ -29,6 +30,9 @@ logger = logging.getLogger(__name__)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "YOUR_OPENAI_API_KEY_HERE"
 
 app = FastAPI(title="VibeWatch Recommender")
+
+# Mount static files for images
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 
 class RecommendRequest(BaseModel):
@@ -100,12 +104,12 @@ HTML_PAGE = """
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VibeWatch – Movie Mood Matcher</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #141414;
+      --bg: #17171b;
       --card-bg: #1f1f1f;
-      --accent: #e50914;
+      --accent: #ffffff;
       --text: #f5f5f5;
       --muted: #b3b3b3;
     }
@@ -113,7 +117,7 @@ HTML_PAGE = """
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Avenir', 'Avenir Next', 'Helvetica Neue', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -147,10 +151,16 @@ HTML_PAGE = """
       border-radius: 8px;
       resize: vertical;
       margin-bottom: 12px;
+      background: linear-gradient(180deg, #306676 0%, #819fa9 100%);
+      color: #e0e0e0;
+    }
+    #queryBox::placeholder {
+      color: #e0e0e0;
+      opacity: 1;
     }
     #submitBtn, #micBtn, #surpriseBtn {
       background: var(--accent);
-      color: white;
+      color: #17171b;
       border: none;
       padding: 14px 28px;
       font-weight: 600;
@@ -299,24 +309,24 @@ HTML_PAGE = """
     .filters-collapsed { max-height:0; padding:0!important; margin:0!important; opacity:0; pointer-events:none; }
     .filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .filters-heading{font-size:1.1rem;font-weight:600;color:var(--text);margin:0;}
-    .filter-toggle{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:4px;transition:opacity .2s ease,transform .2s ease;}
+    .filter-toggle{background:#1a1a1a;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:4px;transition:opacity .2s ease,transform .2s ease;}
     .filter-toggle:hover{opacity:.9;transform:translateY(-1px);}
-    #filterPanel{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;margin-top:24px;box-shadow:0 4px 10px rgba(0,0,0,.4);}    
+    #filterPanel{background:#18181b;border:1px solid #333;border-radius:12px;padding:20px;margin-top:24px;box-shadow:0 4px 10px rgba(0,0,0,.4);}    
     .filter-header{border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:14px;}
-    #controls{position:sticky;top:0;background:#141414;padding-bottom:12px;z-index:100;border-bottom:1px solid #333;}
+    #controls{position:sticky;top:0;background:#17171b;padding-bottom:12px;z-index:100;border-bottom:1px solid #333;}
     #controls textarea{margin-top:8px;}
     #banner{display:none;background:#f39c12;color:#141414;text-align:center;padding:6px 12px;border-radius:6px;margin-top:8px;font-size:.9rem;}
   </style>
 </head>
 <body>
-  <header><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" class="logo" alt="Disney+ logo"/> VibeWatch</header>
+  <header><img src="/images/disney-plus-logo-white.png" class="logo" alt="Disney+ logo"/> VibeWatch</header>
   <main>
     <div id="controls">
     <textarea id="queryBox" placeholder="Describe your vibe…"></textarea>
     <div id="actionButtons">
       <button id="surpriseBtn" onclick="surprise()">🎁 Surprise Me!</button>
       <button id="submitBtn" onclick="submit()">Find Movies</button>
-      <button id="micBtn">🎤 Speak</button>
+      <button id="micBtn"><img src="/images/vibewatch-microphone.svg" alt="microphone" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Speak</button>
     </div>
     <div id="filterPanel" style="display:none;">
       <div class="filter-header"><h3 class="filters-heading">🎛️ Filters</h3><button id="toggleFiltersBtn" class="filter-toggle">Hide Filters ⬆️</button></div>
@@ -408,14 +418,14 @@ HTML_PAGE = """
             stream.getTracks().forEach(t => t.stop());
           };
           mediaRecorder.start();
-          micBtn.textContent = '⏹️ Stop';
+          micBtn.innerHTML = '⏹️ Stop';
           micBtn.classList.add('rec');
         } catch (err) {
           alert('Microphone access denied');
         }
       } else if (mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
-        micBtn.textContent = '🎤 Speak';
+        micBtn.innerHTML = '<img src="/images/vibewatch-microphone.svg" alt="microphone" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Speak';
         micBtn.classList.remove('rec');
       }
     });
